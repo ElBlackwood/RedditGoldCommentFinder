@@ -53,13 +53,13 @@ public class Reader {
 		}
 		
 		LOGGER.info("Complete!");
-		OutputStream outputStream = new FileOutputStream("RedditGoldComments.txt");
+		OutputStream outputStream = new FileOutputStream("output/RedditGoldComments.txt");
 		Writer out = new OutputStreamWriter(outputStream);
-		
+		out.write("Found " + goldComments.size() + " gold comments");
 		for (GoldComment gc : goldComments) {
 			out.write(gc.toString());
 		}
-		
+		out.write("Author: Luke");
 		out.close();
 
 	}
@@ -83,15 +83,13 @@ public class Reader {
 		Pattern p = Pattern.compile(regex);
 		LOGGER.debug("Searchging for comments link...");
 		String line = null;
-		int counter = 0;
 		while ((line = rd.readLine()) != null ) {
 			String[] stringPeices = line.split("<div");
 			
 			for (String s : stringPeices) {
 				m = p.matcher(s);
 				
-				while (m.find() && counter < 12) {
-					++counter;
+				while (m.find()) {
 					
 					CrawlComments page = new CrawlComments(new URL(m.group(1)));
 					goldComments.addAll(page.readComments());
