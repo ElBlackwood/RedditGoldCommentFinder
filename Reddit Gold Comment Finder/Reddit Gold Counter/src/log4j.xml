@@ -1,0 +1,25 @@
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+    <appender name="FILE_APPENDER" class="org.apache.log4j.FileAppender">
+        <param name="File" value="output/reddit_gold_finder.log" />
+        <param name="Threshold" value="DEBUG" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%-5p %d{dd MMM yyyy HH:mm:ss} %C{1} : %m%n"/>
+        </layout>
+    </appender>
+    
+   <appender name="FILE_APPENDER_JAR" class="org.apache.log4j.FileAppender">
+        <param name="File" value="reddit_gold_finder.log" />
+        <param name="Threshold" value="DEBUG" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%-5p %d{dd MMM yyyy HH:mm:ss} %C{1} : %m%n"/>
+        </layout>
+    </appender>
+
+    <root>
+        <level value="debug"/>
+        <appender-ref ref="FILE_APPENDER" />
+        <!-- no appender, output will be swallowed (I think) -->
+    </root>
+</log4j:configuration>
