@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.JOptionPane;
+
 import org.apache.log4j.Logger;
 
 import com.redditgold.model.GoldComment;
@@ -24,7 +26,7 @@ public class Reader {
 	/**
 	 * Max times to follow link to next page.
 	 */
-	private final static int LIMIT = 1;
+	private static int LIMIT = 1;
 	
 	static HttpURLConnection conn;
 	static BufferedReader rd;
@@ -39,6 +41,7 @@ public class Reader {
 	 */
 	public static void main(String[] args) throws IOException {
 		LOGGER.debug("***********************Reddit Gold Comment Finder Started***********************");
+		promptForPageLimit();
  		List<GoldComment> goldComments = new ArrayList<GoldComment>();
 		url = new URL("http://www.reddit.com");
 		
@@ -129,6 +132,30 @@ public class Reader {
 			}
 			
 		}
+	}
+	
+	public static void promptForPageLimit() {
+		Object[] possibleValues = { "1", "2", "3", "4", "5", "10", "15", "20" };
+		Object input = JOptionPane.showInputDialog(null,"How many pages do you want to crawl?", "RedditGoldCommentFinder", JOptionPane.INFORMATION_MESSAGE, null, possibleValues, possibleValues[0]);
+		
+		int inputInt = (input == null) ? 99 : Integer.parseInt((String) input);
+		
+		if (inputInt == 99) {
+			LOGGER.debug("User closed program");
+			System.exit(1);
+		} else if (inputInt > 5 && inputInt < 21) {
+			int answer = JOptionPane.showConfirmDialog(null, "This could take a while. Watch log file to see progress.\nContinue?", "Are you sure?", JOptionPane.YES_NO_OPTION);
+			
+			if (answer == JOptionPane.YES_OPTION) {
+				LIMIT = inputInt;
+			} else {
+				LOGGER.debug("User chose " + inputInt + " but changed their mind, exiting...");
+				System.exit(1);
+			}
+		} else {
+			LIMIT = inputInt;
+		}
+		
 	}
 
 }
