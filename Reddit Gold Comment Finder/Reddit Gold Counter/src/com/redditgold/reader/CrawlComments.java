@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
+
 import com.redditgold.model.GoldComment;
 
 public class CrawlComments {
@@ -31,6 +33,8 @@ public class CrawlComments {
 	private Pattern commentPattern = Pattern.compile(COMMENT_REGEX);
 	private Pattern goldPattern = Pattern.compile(GOLD_REGEX);
 	
+	private static final Logger LOGGER = Logger.getLogger(CrawlComments.class);
+	
 	public CrawlComments(URL commentsPage) throws IOException{
 		this.commentsPage = commentsPage;
 		this.conn = (HttpURLConnection) this.commentsPage.openConnection();
@@ -38,8 +42,14 @@ public class CrawlComments {
 	}
 
 
+	/**
+	 * Crawl through comments page looking for a gold comment.
+	 * @return List of gold comment objects
+	 * @throws MalformedURLException e
+	 * @throws IOException e
+	 */
 	public List<GoldComment> readComments() throws MalformedURLException, IOException {
-		System.out.println("Reading comments");
+		LOGGER.debug("Reading comments");
 		boolean foundTitle = false;
 		String title = null;
 		int goldCommentCounter = 0;
@@ -52,7 +62,7 @@ public class CrawlComments {
 				String goldUser = checkStringWithRegex(line, goldPattern);
 				if (goldUser != null) {
 					goldCommentCounter++;
-					System.out.println("Found gold comment, gathering other details");
+					LOGGER.debug("Found gold comment, gathering more details");
 					String downVotes = checkStringWithRegex(line, downvotePattern);
 					String upVotes = checkStringWithRegex(line, upvotePattern);
 					String comment = checkStringWithRegex(line, commentPattern);
@@ -70,19 +80,29 @@ public class CrawlComments {
 			} else {
 				title = checkStringWithRegex(line, titlePattern);
 				if (title != null) {
-					System.out.println("Title of thread: " + title);
+					LOGGER.debug("Title of thread: " + title);
 					foundTitle = true;
+					if (title.startsWith("LST")) {
+						LOGGER.debug("Title started with LST, probobly an information post so will be discarded");
+						return new ArrayList<GoldComment>();
+					}
 				}
 			}
 			
 			
 		}
 		
-		System.out.println("Found " + goldCommentCounter + " gold comments in thread ");
+		LOGGER.info("Found " + goldCommentCounter + " gold comments");
 		return goldComments;
 		
 	}
 	
+	/**
+	 * Check line of HTML to see if it satisfies given pattern.
+	 * @param line of HTML
+	 * @param pattern to match against
+	 * @return matching string or null
+	 */
 	private String checkStringWithRegex(String line, Pattern pattern) {
 		Matcher m = pattern.matcher(line);
 		

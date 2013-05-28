@@ -1,5 +1,10 @@
 package com.redditgold.model;
 
+/**
+ * Represents a gold comment.
+ * @author Luke
+ *
+ */
 public class GoldComment {
 
 	private String userName;
