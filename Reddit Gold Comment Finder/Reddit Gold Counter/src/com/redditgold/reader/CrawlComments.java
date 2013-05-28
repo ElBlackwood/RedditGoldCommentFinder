@@ -82,8 +82,8 @@ public class CrawlComments {
 				if (title != null) {
 					LOGGER.debug("Title of thread: " + title);
 					foundTitle = true;
-					if (title.startsWith("LST")) {
-						LOGGER.debug("Title started with LST, probobly an information post so will be discarded");
+					if (title.startsWith("LPT")) {
+						LOGGER.debug("Title started with LPT, probobly an information post so will be discarded");
 						return new ArrayList<GoldComment>();
 					}
 				}
