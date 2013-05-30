@@ -9,9 +9,11 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.SocketException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,7 +34,10 @@ public class Reader {
 	static BufferedReader rd;
 	static URL url;
 	static URL nextUrl;
+	private static int pagesToCrawl = 0;
+	private static final int TIME_TO_WAIT = 12000;
 	
+	private static List<GoldComment> goldComments = new ArrayList<GoldComment>();
 	private static final Logger LOGGER = Logger.getLogger(Reader.class);
 
 	/**
@@ -41,20 +46,13 @@ public class Reader {
 	 */
 	public static void main(String[] args) throws IOException {
 		LOGGER.debug("***********************Reddit Gold Comment Finder Started***********************");
+		LOGGER.debug("Make this window bigger by adjusting the properties in the top left corner.");
+		LOGGER.debug("Press Ctrl + C to cancel at any time.");
 		promptForPageLimit();
- 		List<GoldComment> goldComments = new ArrayList<GoldComment>();
 		url = new URL("http://www.reddit.com");
 		
-		int counter = 0;
-		
-		while (counter < LIMIT) {
-			LOGGER.info("----------Checking " + url.toString() + "------------");
-			goldComments.addAll(crawlForComments(url));
-			crawlForNextLink(url);
-			url = nextUrl;
-			counter++;
-		}
-		
+		crawlingLoop();
+
 		LOGGER.info("Complete!");
 		OutputStream outputStream = new FileOutputStream("output/RedditGoldComments.txt");
 		Writer out = new OutputStreamWriter(outputStream);
@@ -91,11 +89,11 @@ public class Reader {
 			
 			for (String s : stringPeices) {
 				m = p.matcher(s);
-				
-				while (m.find()) {
-					
+				int i = 0;
+				while (m.find() && i < 4) {
 					CrawlComments page = new CrawlComments(new URL(m.group(1)));
 					goldComments.addAll(page.readComments());
+					i++;
 				} 
 				
 			}
@@ -156,6 +154,35 @@ public class Reader {
 			LIMIT = inputInt;
 		}
 		
+	}
+	
+	private static void crawlingLoop() throws IOException{
+		try {
+			while (pagesToCrawl < LIMIT) {
+				LOGGER.info("----------Checking " + url.toString() + "------------");
+				goldComments.addAll(crawlForComments(url));
+				crawlForNextLink(url);
+				url = nextUrl;
+				pagesToCrawl++;
+			}
+			
+		} catch (SocketException e) {
+			LOGGER.warn("Exception while crawling: " + e.getMessage());
+			int answer = JOptionPane.showConfirmDialog(null, "Reddit may have blocked your connection. Would you like to wait 2 mins then try again?" +
+					"\nOr would you like to quit now and see the " + goldComments.size() + " gold comments so far?","There has been an error!", 
+					JOptionPane.YES_NO_OPTION);
+			if (answer == JOptionPane.YES_OPTION) {
+				try {
+					Thread.sleep(TIME_TO_WAIT);
+				} catch (InterruptedException e1) {
+					LOGGER.error("Having trouble sleeping!");
+					e1.printStackTrace();
+				}
+				crawlingLoop();
+			} else if (answer == JOptionPane.NO_OPTION) {
+				//move one and complete.
+			}
+		}
 	}
 
 }

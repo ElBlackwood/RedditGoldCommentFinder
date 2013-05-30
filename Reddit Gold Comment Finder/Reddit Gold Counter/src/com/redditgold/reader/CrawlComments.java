@@ -24,6 +24,7 @@ public class CrawlComments {
 	private final String TITLE_REGEX = ".*<title>(.*?)</title>";
 	private final String UPVOTE_REGEX = ".*?<span class=\"score likes\">(.*?)</span>.*";
 	private final String DOWNVOTE_REGEX = ".*?<span class=\"score dislikes\">(.*?)</span>.*";
+	//TODO fix comment regex to find multi paragraph comments. ending in closing div doesn't work.
 	private final String COMMENT_REGEX = ".*<p>(.*)</p>.*";
 	private final String GOLD_REGEX = ".*title=\"a redditor has gifted reddit gold to (.*?) for this comment.*";
 	
